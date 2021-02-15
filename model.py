@@ -1,10 +1,13 @@
 import numpy as np
 import pandas as pd
 from matplotlib import pylab
+from scipy.sparse import hstack
+from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import average_precision_score, roc_auc_score
 from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeClassifier, plot_tree
+from sklearn.ensemble import RandomForestClassifier
 
 # Read Treated Data from CSV
 treatedData = pd.read_csv("./data/ytTreatedLinks.csv")
@@ -28,19 +31,36 @@ y = treatedData['y'].copy()
 
 # Train and test segmentation
 maskTrain = cleanedData.index < 200
-maskVal = cleanedData.index >= 200
-xtrain, xtest = features[maskTrain], features[maskVal]
-ytrain, ytest = y[maskTrain], y[maskVal]
+maskTest = cleanedData.index >= 200
+xTrain, xTest = features[maskTrain], features[maskTest]
+yTrain, yTest = y[maskTrain], y[maskTest]
 
-# Modelling
-model = DecisionTreeClassifier(random_state=0, max_depth=3, class_weight="balanced")
-model.fit(xtrain, ytrain)
+# Active Learning: Extracting text to help labeling
+titleTrain = cleanedData[maskTrain]['title']
+titleTest = cleanedData[maskTest]['title']
+titleVec = TfidfVectorizer(min_df=2)
+titleBOWTrain = titleVec.fit_transform(titleTrain)
+titleBOWTest = titleVec.transform(titleTest)
 
-prob = model.predict_proba(xtest)[:, 1]
+# Include extracted text into training and testing
+xTrainWText = hstack([xTrain, titleBOWTrain])
+xTestWText = hstack([xTest, titleBOWTest])
+
+# Modelling: model 1
+model1 = DecisionTreeClassifier(random_state=0, max_depth=3, class_weight="balanced")
+model1.fit(xTrainWText, yTrain)
+
+prob1 = model1.predict_proba(xTestWText)[:, 1]
+
+# Modelling: model 2
+model2 = RandomForestClassifier(n_estimators=1000, random_state=0, class_weight="balanced", n_jobs=6)
+model2.fit(xTrainWText, yTrain)
+
+prob2 = model2.predict_proba(xTestWText)[:, 1]
 
 # Metrics for testing the model
-average_precision_score(ytest, prob)
-roc_auc_score(ytest, prob)
+average_precision_score(yTest, prob1)
+roc_auc_score(yTest, prob1)
 
 fig, ax = pylab.subplots(1, 1, figsize=(20, 20))
-plot_tree(model, ax=ax, feature_names=xtrain.columns)
+plot_tree(model1, ax=ax, feature_names=xTrain.columns)
