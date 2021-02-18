@@ -1,7 +1,13 @@
 import collect
 import treat
-import model
+import clean
+import firstModel
+import actLearning
+import actLearningTest
 
-collect.collect()
-treat.treat()
-model.model()
+# collect.collect()
+# treat.treat()
+mlData = clean.clean()
+mlData = firstModel.firstModel(mlData)
+# actLearning.actLearning(mlData)
+actLearningTest.actLearningTest(mlData)

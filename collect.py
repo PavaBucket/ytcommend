@@ -23,7 +23,7 @@ def collect():
     # Collect the data using youtube dl and store on json
     for query in queries:
         with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-            infoSearched = ydl.extract_info("ytsearch1000:{}".format(query))
+            infoSearched = ydl.extract_info("ytsearchdate100:{}".format(query))
             with open("./data/ytRawLinks.json", "+a") as output:
                 for entry in infoSearched['entries']:
                     if entry is not None:

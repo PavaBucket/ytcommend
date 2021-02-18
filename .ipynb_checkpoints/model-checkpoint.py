@@ -12,12 +12,12 @@ treatedData = pd.read_csv("./data/ytTreatedLinks.csv")
 treatedData = treatedData[treatedData['y'].notnull()]
 
 # Clean the data
-cleanedData = pd.DataFrame(index=treatedData.index)
+cleanedData = pd.DataFrame(index=treatedData['upload_date'])
 cleanedData['upload_date'] = pd.to_datetime(treatedData['upload_date'], format="%Y%m%d")
 cleanedData['view_count'] = treatedData['view_count']
 
 # Create the features dataset
-features = pd.DataFrame(index=cleanedData.index)
+features = pd.DataFrame(index=cleanedData['upload_date'])
 features['time_since_up'] = (pd.to_datetime('2021-02-10') - cleanedData['upload_date']) / np.timedelta64(1, 'D')
 features['view_count'] = cleanedData['view_count']
 features['views_day'] = features['view_count'] / features['time_since_up']
