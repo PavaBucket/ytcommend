@@ -1,6 +1,7 @@
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import average_precision_score, roc_auc_score
 from sklearn.tree import DecisionTreeClassifier
+from lightgbm import LGBMClassifier
 
 
 def randomForestWMetrics(mlData):
@@ -19,7 +20,7 @@ def randomForestWMetrics(mlData):
     return mlData
 
 
-def models(mlData):
+def decisionTreeWMetrics(mlData):
 
     # Modelling: Decision Tree
     modelDT = DecisionTreeClassifier(random_state=0, max_depth=3, class_weight="balanced")
@@ -31,5 +32,20 @@ def models(mlData):
     # Metrics for testing the model
     mlData['apsDT'] = average_precision_score(mlData['yTest'], mlData['probDT'])
     mlData['roc_aucDT'] = roc_auc_score(mlData['yTest'], mlData['probDT'])
+
+    return mlData
+
+
+def lgbmWMetrics(mlData):
+
+    modelLGBM = LGBMClassifier(random_state=0, class_weight="balanced", n_jobs=6)
+    modelLGBM.fit(mlData['xTrain'], mlData['yTrain'])
+    mlData['modelLGBM'] = modelLGBM
+
+    mlData['probLGBM'] = modelLGBM.predict_proba(mlData['xTest'])[:, 1]
+
+    # Metrics for testing the model
+    mlData['apsLGBM'] = average_precision_score(mlData['yTest'], mlData['probLGBM'])
+    mlData['roc_aucLGBM'] = roc_auc_score(mlData['yTest'], mlData['probLGBM'])
 
     return mlData

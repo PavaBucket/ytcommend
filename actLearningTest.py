@@ -17,6 +17,9 @@ def actLearningTest(mlData):
     # Concatenate the 2 datasets
     data = pd.concat([treatedData, actLearnData.drop('p', axis=1)])
 
+    # Treat the concatenated data
+    data = functions.treat(data)
+
     # Clean and create features
     cleanedData = functions.clean(data)
     cleanedData['new'] = data['new'].fillna(0)
@@ -58,4 +61,5 @@ def actLearningTest(mlData):
 
     # Use the model and look at the scores
     mlData = models.randomForestWMetrics(mlData)
-    mlData
+
+    return mlData

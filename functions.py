@@ -5,9 +5,14 @@ from scipy.sparse import hstack
 from sklearn.feature_extraction.text import TfidfVectorizer
 
 
+# Treat the data
+def treat(data):
+    data = data.drop_duplicates(subset=['webpage_url'])
+    return data
+
+
 # Clean the data
 def clean(data):
-
     cleanedData = pd.DataFrame(index=data.index)
     cleanedData['title'] = data['title']
     cleanedData['upload_date'] = pd.to_datetime(data['upload_date'], format="%Y%m%d")
@@ -29,7 +34,7 @@ def createFeatures(cleanedData):
 def dataFromText(cleanedData, maskTrain, maskTest, mlData):
     titleTrain = cleanedData[maskTrain]['title']
     titleTest = cleanedData[maskTest]['title']
-    titleVec = TfidfVectorizer(min_df=2)
+    titleVec = TfidfVectorizer(min_df=2, ngram_range=(1, 2))
     titleBOWTrain = titleVec.fit_transform(titleTrain)
     titleBOWTest = titleVec.transform(titleTest)
 
