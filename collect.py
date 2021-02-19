@@ -1,30 +1,15 @@
-import youtube_dl
 import json
-
-
-# Youtube-dl options to only list metadata
-ydl_opts = {
-    'quiet': True,
-    'skip_download': True,
-    'forceid': True,
-    'forcetitle': True,
-    'forceurl': True,
-    'forcejson': True,
-    'ignoreerrors': True,
-    'download': False,
-}
-
-# Query filters
-queries = ["machine+learning", "data+science", "kaggle"]
+import youtube_dl
+import settings
 
 
 def collect():
 
     # Collect the data using youtube dl and store on json
-    for query in queries:
-        with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-            infoSearched = ydl.extract_info("ytsearchdate100:{}".format(query))
-            with open("./data/ytRawLinks.json", "+a") as output:
+    for filter in settings.queryFilters:
+        with youtube_dl.YoutubeDL(settings.ydl_opts) as ydl:
+            infoSearched = ydl.extract_info("{}:{}".format(settings.baseQuery, filter))
+            with open(settings.rawLinksPath, "+a") as output:
                 for entry in infoSearched['entries']:
                     if entry is not None:
                         data = {"title": entry.get('title'), "description": entry.get('description'), "upload_date": entry.get('upload_date'), "uploader": entry.get('uploader'),
@@ -33,5 +18,5 @@ def collect():
                                 "is_live": entry.get('is_live'), "like_count": entry.get('like_count'), "dislike_count": entry.get('dislike_count'), "channel": entry.get('channel'),
                                 "extractor": entry.get('extractor'), "n_entries": entry.get('n_entries'), "playlist": entry.get('playlist'), "playlist_id": entry.get('playlist_id'),
                                 "thumbnail": entry.get('thumbnail'), "fps": entry.get('fps'), "height": entry.get('height'),
-                                "url": entry.get('url'), "width": entry.get('width'), "query": query}
+                                "url": entry.get('url'), "width": entry.get('width'), "query": filter}
                         output.write("{}\n".format(json.dumps(data)))

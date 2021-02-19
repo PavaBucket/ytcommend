@@ -1,7 +1,8 @@
-import models
+import optimization
+import settings
 
 
 def mainModel(mlData):
-    models.lgbmWMetrics(mlData)
+    optimization.optimizeLGBM(mlData, settings.lgbmParameters, settings.tfidfParameters)
 
     return mlData

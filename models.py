@@ -36,9 +36,9 @@ def decisionTreeWMetrics(mlData):
     return mlData
 
 
-def lgbmWMetrics(mlData):
+def lgbmWMetrics(mlData, lgbmParameters):
 
-    modelLGBM = LGBMClassifier(random_state=0, class_weight="balanced", n_jobs=6)
+    modelLGBM = LGBMClassifier(lgbmParameters, num_leaves=2 ** lgbmParameters['max_depth'], random_state=0, class_weight="balanced", n_jobs=6)
     modelLGBM.fit(mlData['xTrain'], mlData['yTrain'])
     mlData['modelLGBM'] = modelLGBM
 

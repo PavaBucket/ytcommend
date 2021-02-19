@@ -11,5 +11,5 @@ import mainModel
 mlData = clean.clean()
 mlData = firstModel.firstModel(mlData)
 # actLearning.actLearning(mlData)
-actLearningTest.actLearningTest(mlData)
+mlData = actLearningTest.actLearningTest(mlData)
 mainModel.mainModel(mlData)

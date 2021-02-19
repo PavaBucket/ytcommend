@@ -1,16 +1,17 @@
 import pandas as pd
 import functions
 import models
+import settings
 
 
 def actLearningTest(mlData):
 
     # Read Treated Data from CSV
-    treatedData = pd.read_csv("./data/ytTreatedLinks.csv")
+    treatedData = pd.read_csv(settings.treatedLinksPath)
     treatedData = treatedData[treatedData['y'].notnull()]
 
     # Get the new active learning labeled data
-    actLearnData = pd.read_csv("./data/ytActiveLearningExamples.csv")
+    actLearnData = pd.read_csv(settings.actLearningExamplesPath)
     actLearnData = actLearnData[actLearnData['y'].notnull()]
     actLearnData['new'] = 1
 
@@ -26,40 +27,21 @@ def actLearningTest(mlData):
     features = functions.createFeatures(cleanedData)
     y = data['y'].copy()
 
-    # Test 1: increase test dataset
-    maskTrain = (cleanedData['upload_date'] < '2020-12-08') & (cleanedData['new'] == 0)
-    maskTest = cleanedData['upload_date'] >= '2020-12-08'
-    mlData['xTrain'], mlData['xTest'] = features[maskTrain], features[maskTest]
-    mlData['yTrain'], mlData['yTest'] = y[maskTrain], y[maskTest]
+    # Get train and test masks
+    maskTrainTest = settings.getMaskTrainTest(cleanedData)
+
+    # Test: increase both datasets and run the first model
+    mlData['xTrain'], mlData['xTest'] = features[maskTrainTest['maskTrain']], features[maskTrainTest['maskTest']]
+    mlData['yTrain'], mlData['yTest'] = y[maskTrainTest['maskTrain']], y[maskTrainTest['maskTest']]
 
     # Extract data from text
-    mlData = functions.dataFromText(cleanedData, maskTrain, maskTest, mlData)
+    mlData = functions.dataFromText(cleanedData, maskTrainTest['maskTrain'], maskTrainTest['maskTest'], mlData, settings.tfidfParameters)
 
     # Use the model and look at the scores
     mlData = models.randomForestWMetrics(mlData)
 
-    # Test 2: increase train dataset
-    maskTrain = (cleanedData['upload_date'] < '2020-12-08')
-    maskTest = (cleanedData['upload_date'] >= '2020-12-08') & (cleanedData['new'] == 0)
-    mlData['xTrain'], mlData['xTest'] = features[maskTrain], features[maskTest]
-    mlData['yTrain'], mlData['yTest'] = y[maskTrain], y[maskTest]
-
-    # Extract data from text
-    mlData = functions.dataFromText(cleanedData, maskTrain, maskTest, mlData)
-
-    # Use the model and look at the scores
-    mlData = models.randomForestWMetrics(mlData)
-
-    # Test 3: increase both datasets
-    maskTrain = cleanedData['upload_date'] < '2020-12-08'
-    maskTest = cleanedData['upload_date'] >= '2020-12-08'
-    mlData['xTrain'], mlData['xTest'] = features[maskTrain], features[maskTest]
-    mlData['yTrain'], mlData['yTest'] = y[maskTrain], y[maskTest]
-
-    # Extract data from text
-    mlData = functions.dataFromText(cleanedData, maskTrain, maskTest, mlData)
-
-    # Use the model and look at the scores
-    mlData = models.randomForestWMetrics(mlData)
+    # store the cleaned data and features
+    mlData['cleanedData'] = cleanedData
+    mlData['features'] = features
 
     return mlData

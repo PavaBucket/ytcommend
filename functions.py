@@ -31,10 +31,10 @@ def createFeatures(cleanedData):
 
 
 # Extract data from text
-def dataFromText(cleanedData, maskTrain, maskTest, mlData):
+def dataFromText(cleanedData, maskTrain, maskTest, mlData, tfidfParameters):
     titleTrain = cleanedData[maskTrain]['title']
     titleTest = cleanedData[maskTest]['title']
-    titleVec = TfidfVectorizer(min_df=2, ngram_range=(1, 2))
+    titleVec = TfidfVectorizer(tfidfParameters)
     titleBOWTrain = titleVec.fit_transform(titleTrain)
     titleBOWTest = titleVec.transform(titleTest)
 

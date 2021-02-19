@@ -1,8 +1,9 @@
 import functions
 import pandas as pd
+import settings
 
 
 def treat():
-    ytDataFrame = pd.read_json("./data/ytRawLinks.json", lines=True)
+    ytDataFrame = pd.read_json(settings.rawLinksPath, lines=True)
     ytTreatedDataFrame = functions.treat(ytDataFrame)
-    ytTreatedDataFrame.to_csv("./data/ytTreatedLinks.csv")
+    ytTreatedDataFrame.to_csv(settings.treatedLinksPath)

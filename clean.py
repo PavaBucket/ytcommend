@@ -1,11 +1,12 @@
 import functions
 
 import pandas as pd
+import settings
 
 
 def clean():
     # Read Treated Data from CSV
-    treatedData = pd.read_csv("./data/ytTreatedLinks.csv")
+    treatedData = pd.read_csv(settings.treatedLinksPath)
     treatedData = treatedData[treatedData['y'].notnull()]
 
     # Clean the data
@@ -19,12 +20,11 @@ def clean():
 
     # Train and test segmentation
     mlData = {}
-    maskTrain = cleanedData['upload_date'] < '2020-12-08'
-    maskTest = cleanedData['upload_date'] >= '2020-12-08'
-    mlData['xTrain'], mlData['xTest'] = features[maskTrain], features[maskTest]
-    mlData['yTrain'], mlData['yTest'] = y[maskTrain], y[maskTest]
+    maskTrainTest = settings.getMaskTrainTest(cleanedData)
+    mlData['xTrain'], mlData['xTest'] = features[maskTrainTest['maskTrain']], features[maskTrainTest['maskTest']]
+    mlData['yTrain'], mlData['yTest'] = y[maskTrainTest['maskTrain']], y[maskTrainTest['maskTest']]
 
     # Extract data from text
-    mlData = functions.dataFromText(cleanedData, maskTrain, maskTest, mlData)
+    mlData = functions.dataFromText(cleanedData, maskTrainTest['maskTrain'], maskTrainTest['maskTest'], mlData, settings.tfidfParameters)
 
     return mlData
