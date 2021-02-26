@@ -3,9 +3,10 @@ from scipy.sparse import hstack
 
 import functions
 import settings
+import variables
 
 
-def actLearning(mlData):
+def actLearning():
 
     # Unlabeled data #
 
@@ -20,13 +21,13 @@ def actLearning(mlData):
     features = functions.createFeatures(cleanedData)
 
     # Use the data extractor from text
-    textVector = mlData['tFidVec'].transform(cleanedData['title'])
+    textVector = variables.mlData['tFidVec'].transform(cleanedData['title'])
 
     # Include extracted text into features
     features = hstack([features, textVector])
 
     # Using the first model, predict the results for the unlabeled data and store on features
-    probRFUnlabeled = mlData['modelRF'].predict_proba(features)[:, 1]
+    probRFUnlabeled = variables.mlData['modelRF'].predict_proba(features)[:, 1]
     unlabeledData['p'] = probRFUnlabeled
 
     # Find the most difficult predictions, get some random examples and put in csv to label

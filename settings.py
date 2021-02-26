@@ -14,10 +14,16 @@ ydl_opts = {
 baseQuery = "ytsearchdate100"
 queryFilters = ["machine+learning", "data+science", "kaggle"]
 
-# File paths
+# Data files paths
 rawLinksPath = "./data/ytRawLinks.json"
 treatedLinksPath = "./data/ytTreatedLinks.csv"
 actLearningExamplesPath = "./data/ytActiveLearningExamples.csv"
+
+# Models paths
+RandomForestPath = "./models/RandomForest.z"
+lightGBMPath = "./models/LightGBM.z"
+logisticRegressionPath = "./models/LogisticRegression.z"
+VectorizerPath = "./models/Vectorizer.z"
 
 
 # Train test split settings
@@ -39,8 +45,17 @@ def getActiveLearningFilters(unlabeledData):
     return maskUnlabeled
 
 
-# Optimization #
+# Optimization
 
-# LGBM
+# LGBM: Space boundaries for optimization
 
-# lgbmParameters = {'learning_rate': , 'max_depth': , 'min_child_samples': , 'subsample': , 'colsample_bytree': , 'n_estimators': , }
+LGBMSpace = [
+    (1e-3, 1e-1, 'log-uniform'),  # learning rate
+    (1, 10),  # max_depth
+    (1, 20),  # min_child_samples
+    (0.05, 1.),  # subsample
+    (0.05, 1.),  # colsample_bytree
+    (100, 1000),  # n_estimators
+    (1, 5),  # min_df
+    (1, 5),  # ngram_range
+]

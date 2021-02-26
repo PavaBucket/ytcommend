@@ -1,8 +1,7 @@
 import models
+import variables
 
 
-def firstModel(mlData):
+def firstModel():
 
-    mlData = models.randomForestWMetrics(mlData)
-
-    return mlData
+    variables.mlData = models.randomForestWMetrics(variables.mlData)

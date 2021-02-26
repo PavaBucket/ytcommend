@@ -6,10 +6,15 @@ import actLearning
 import actLearningTest
 import mainModel
 
+import variables
+
+# Initializing variables
+variables.init()
+
 # collect.collect()
 # treat.treat()
-mlData = clean.clean()
-mlData = firstModel.firstModel(mlData)
+clean.clean()
+firstModel.firstModel()
 # actLearning.actLearning(mlData)
-mlData = actLearningTest.actLearningTest(mlData)
-mainModel.mainModel(mlData)
+actLearningTest.actLearningTest()
+mainModel.mainModel()

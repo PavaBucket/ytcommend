@@ -2,6 +2,7 @@ import functions
 
 import pandas as pd
 import settings
+import variables
 
 
 def clean():
@@ -19,12 +20,9 @@ def clean():
     y = treatedData['y'].copy()
 
     # Train and test segmentation
-    mlData = {}
     maskTrainTest = settings.getMaskTrainTest(cleanedData)
-    mlData['xTrain'], mlData['xTest'] = features[maskTrainTest['maskTrain']], features[maskTrainTest['maskTest']]
-    mlData['yTrain'], mlData['yTest'] = y[maskTrainTest['maskTrain']], y[maskTrainTest['maskTest']]
+    variables.mlData['xTrain'], variables.mlData['xTest'] = features[maskTrainTest['maskTrain']], features[maskTrainTest['maskTest']]
+    variables.mlData['yTrain'], variables.mlData['yTest'] = y[maskTrainTest['maskTrain']], y[maskTrainTest['maskTest']]
 
     # Extract data from text
-    mlData = functions.dataFromText(cleanedData, maskTrainTest['maskTrain'], maskTrainTest['maskTest'], mlData, settings.tfidfParameters)
-
-    return mlData
+    variables.mlData = functions.dataFromText(cleanedData, maskTrainTest['maskTrain'], maskTrainTest['maskTest'], variables.mlData, settings.tfidfParameters)

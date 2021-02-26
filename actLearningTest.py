@@ -2,9 +2,10 @@ import pandas as pd
 import functions
 import models
 import settings
+import variables
 
 
-def actLearningTest(mlData):
+def actLearningTest():
 
     # Read Treated Data from CSV
     treatedData = pd.read_csv(settings.treatedLinksPath)
@@ -31,17 +32,15 @@ def actLearningTest(mlData):
     maskTrainTest = settings.getMaskTrainTest(cleanedData)
 
     # Test: increase both datasets and run the first model
-    mlData['xTrain'], mlData['xTest'] = features[maskTrainTest['maskTrain']], features[maskTrainTest['maskTest']]
-    mlData['yTrain'], mlData['yTest'] = y[maskTrainTest['maskTrain']], y[maskTrainTest['maskTest']]
+    variables.mlData['xTrain'], variables.mlData['xTest'] = features[maskTrainTest['maskTrain']], features[maskTrainTest['maskTest']]
+    variables.mlData['yTrain'], variables.mlData['yTest'] = y[maskTrainTest['maskTrain']], y[maskTrainTest['maskTest']]
 
     # Extract data from text
-    mlData = functions.dataFromText(cleanedData, maskTrainTest['maskTrain'], maskTrainTest['maskTest'], mlData, settings.tfidfParameters)
+    variables.mlData = functions.dataFromText(cleanedData, maskTrainTest['maskTrain'], maskTrainTest['maskTest'], variables.mlData, settings.tfidfParameters)
 
     # Use the model and look at the scores
-    mlData = models.randomForestWMetrics(mlData)
+    variables.mlData = models.randomForestWMetrics(variables.mlData)
 
     # store the cleaned data and features
-    mlData['cleanedData'] = cleanedData
-    mlData['features'] = features
-
-    return mlData
+    variables.mlData['cleanedData'] = cleanedData
+    variables.mlData['features'] = features
