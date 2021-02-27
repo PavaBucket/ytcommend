@@ -20,10 +20,10 @@ treatedLinksPath = "./data/ytTreatedLinks.csv"
 actLearningExamplesPath = "./data/ytActiveLearningExamples.csv"
 
 # Models paths
-RandomForestPath = "./models/RandomForest.z"
-lightGBMPath = "./models/LightGBM.z"
-logisticRegressionPath = "./models/LogisticRegression.z"
-VectorizerPath = "./models/Vectorizer.z"
+RandomForestPath = "./models/RandomForest.pkl.z"
+lightGBMPath = "./models/LightGBM.pkl.z"
+logisticRegressionPath = "./models/LogisticRegression.pkl.z"
+VectorizerPath = "./models/Vectorizer.pkl.z"
 
 
 # Train test split settings
