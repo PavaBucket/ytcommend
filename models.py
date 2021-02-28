@@ -60,7 +60,7 @@ def logisticRegressionWMetrics(mlData):
     modelLR.fit(mlData['scaledXTrain'], mlData['yTrain'])
     mlData['modelLR'] = modelLR
 
-    mlData['probLR'] = modelLR.predict_proba(mlData['xTest'])[:, 1]
+    mlData['probLR'] = modelLR.predict_proba(mlData['scaledXTest'])[:, 1]
 
     # Metrics for testing the model
     mlData['apsLR'] = average_precision_score(mlData['yTest'], mlData['probLR'])
