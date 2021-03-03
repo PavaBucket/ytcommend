@@ -1,3 +1,4 @@
+import functions
 import joblib as jb
 import models
 import optimization
@@ -12,11 +13,26 @@ from sklearn.metrics import average_precision_score, roc_auc_score
 
 def mainModel():
 
+    # Optimize a LGBM to get ideal parameters for TFidVec and models
+    variables.mlData['paramsOptimizedLGBM'], variables.mlData['apsOptimizedLGBM'] = optimization.optimizeLGBM(settings.LGBMSpace)
+
+    # Make the main TFiDVectorizer with the params of the optimization
+    maskTrainTest = settings.getMaskTrainTest(variables.mlData['cleanedData'])
+    variables.mlData = functions.dataFromText(variables.mlData['cleanedData'], maskTrainTest['maskTrain'], maskTrainTest['maskTest'],
+                                              variables.mlData,
+                                              {'min_df': variables.mlData['paramsOptimizedLGBM'][6], 'ngram_range': (1, variables.mlData['paramsOptimizedLGBM'][7])})
+
+    # Make the main LGBM model from the ideal parameters
+    variables.mlData = models.lgbmWMetrics(variables.mlData, 2 ** variables.mlData['paramsOptimizedLGBM'][1],
+                                           variables.mlData['paramsOptimizedLGBM'][0],
+                                           variables.mlData['paramsOptimizedLGBM'][1],
+                                           variables.mlData['paramsOptimizedLGBM'][2],
+                                           variables.mlData['paramsOptimizedLGBM'][3],
+                                           variables.mlData['paramsOptimizedLGBM'][4],
+                                           variables.mlData['paramsOptimizedLGBM'][5])
+
     # Random Forest
     variables.mlData = models.randomForestWMetrics(variables.mlData)
-
-    # Optimized LGBM
-    variables.mlData['paramsOptimizedLGBM'], variables.mlData['apsOptimizedLGBM'] = optimization.optimizeLGBM(settings.LGBMSpace)
 
     # Scaling
     variables.mlData['scaledXTrain'] = csr_matrix(variables.mlData['xTrain'].copy())
