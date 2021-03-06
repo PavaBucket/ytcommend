@@ -31,19 +31,17 @@ def createFeatures(cleanedData):
 
 
 # Extract data from text
-def dataFromText(cleanedData, maskTrain, maskTest, mlData, tfidfParameters):
-    titleTrain = cleanedData[maskTrain]['title']
-    titleTest = cleanedData[maskTest]['title']
-    titleVec = TfidfVectorizer(tfidfParameters)
-    titleBOWTrain = titleVec.fit_transform(titleTrain)
-    titleBOWTest = titleVec.transform(titleTest)
+def dataFromText(textVector, maskTrain, maskTest, tfidfParameters):
+    trainData = textVector[maskTrain]
+    testData = textVector[maskTest]
+    tFidfVec = TfidfVectorizer(tfidfParameters)
+    trainTextData = tFidfVec.fit_transform(trainData)
+    testTextData = tFidfVec.transform(testData)
 
-    # Include extracted text into training and testing
-    xTrainWText = hstack([mlData['xTrain'], titleBOWTrain])
-    xTestWText = hstack([mlData['xTest'], titleBOWTest])
+    return (tFidfVec, trainTextData, testTextData)
 
-    mlData['tFidVec'] = titleVec
-    mlData['xTrain'] = xTrainWText
-    mlData['xTest'] = xTestWText
 
-    return mlData
+# Merge Features with text data
+def mergeDataFrames(df1, df2):
+    merged = hstack([df1, df2])
+    return merged

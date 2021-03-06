@@ -32,15 +32,22 @@ def actLearningTest():
     maskTrainTest = settings.getMaskTrainTest(cleanedData)
 
     # Test: increase both datasets and run the first model
-    variables.mlData['xTrain'], variables.mlData['xTest'] = features[maskTrainTest['maskTrain']], features[maskTrainTest['maskTest']]
-    variables.mlData['yTrain'], variables.mlData['yTest'] = y[maskTrainTest['maskTrain']], y[maskTrainTest['maskTest']]
+    xTrain, xTest = features[maskTrainTest['maskTrain']], features[maskTrainTest['maskTest']]
+    yTrain, yTest = y[maskTrainTest['maskTrain']], y[maskTrainTest['maskTest']]
 
     # Extract data from text
-    variables.mlData = functions.dataFromText(cleanedData, maskTrainTest['maskTrain'], maskTrainTest['maskTest'], variables.mlData, settings.tfidfParameters)
+    variables.mlData['tFidVec'], titleBOWTrain, titleBOWTest = functions.dataFromText(cleanedData['title'], maskTrainTest['maskTrain'], maskTrainTest['maskTest'], settings.tfidfParameters)
+
+    # Include extracted text into training and testing
+    variables.mlData['xTrain'] = functions.mergeDataFrames(xTrain, titleBOWTrain)
+    variables.mlData['xTest'] = functions.mergeDataFrames(xTest, titleBOWTest)
+    variables.mlData['yTrain'] = yTrain
+    variables.mlData['yTest'] = yTest
 
     # Use the model and look at the scores
-    variables.mlData = models.randomForestWMetrics(variables.mlData)
+    variables.mlData['modelRF'], variables.mlData['probRF'], variables.mlData['apsRF'], variables.mlData['roc_aucRF'] = models.randomForestWMetrics(variables.mlData['xTrain'], variables.mlData['yTrain'], variables.mlData['xTest'], variables.mlData['yTest'])
 
     # store the cleaned data and features
     variables.mlData['cleanedData'] = cleanedData
     variables.mlData['features'] = features
+    variables.mlData['y'] = y

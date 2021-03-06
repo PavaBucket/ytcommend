@@ -13,26 +13,22 @@ from sklearn.metrics import average_precision_score, roc_auc_score
 
 def mainModel():
 
-    # Optimize a LGBM to get ideal parameters for TFidVec and models
+    # Optimize to get ideal parameters for LGBM model
     variables.mlData['paramsOptimizedLGBM'], variables.mlData['apsOptimizedLGBM'] = optimization.optimizeLGBM(settings.LGBMSpace)
 
-    # Make the main TFiDVectorizer with the params of the optimization
-    maskTrainTest = settings.getMaskTrainTest(variables.mlData['cleanedData'])
-    variables.mlData = functions.dataFromText(variables.mlData['cleanedData'], maskTrainTest['maskTrain'], maskTrainTest['maskTest'],
-                                              variables.mlData,
-                                              {'min_df': variables.mlData['paramsOptimizedLGBM'][6], 'ngram_range': (1, variables.mlData['paramsOptimizedLGBM'][7])})
-
-    # Make the main LGBM model from the ideal parameters
-    variables.mlData = models.lgbmWMetrics(variables.mlData, 2 ** variables.mlData['paramsOptimizedLGBM'][1],
-                                           variables.mlData['paramsOptimizedLGBM'][0],
-                                           variables.mlData['paramsOptimizedLGBM'][1],
-                                           variables.mlData['paramsOptimizedLGBM'][2],
-                                           variables.mlData['paramsOptimizedLGBM'][3],
-                                           variables.mlData['paramsOptimizedLGBM'][4],
-                                           variables.mlData['paramsOptimizedLGBM'][5])
+    # Make the main LGBM model from the optimized parameters and the settings TFid
+    variables.mlData['modelLGBM'], variables.mlData['probLGBM'], variables.mlData['apsLGBM'], variables.mlData['roc_aucLGBM'] = models.lgbmWMetrics(
+        variables.mlData['xTrain'], variables.mlData['yTrain'], variables.mlData['xTest'], variables.mlData['yTest'],
+        2 ** variables.mlData['paramsOptimizedLGBM'][1],
+        variables.mlData['paramsOptimizedLGBM'][0],
+        variables.mlData['paramsOptimizedLGBM'][1],
+        variables.mlData['paramsOptimizedLGBM'][2],
+        variables.mlData['paramsOptimizedLGBM'][3],
+        variables.mlData['paramsOptimizedLGBM'][4],
+        variables.mlData['paramsOptimizedLGBM'][5])
 
     # Random Forest
-    variables.mlData = models.randomForestWMetrics(variables.mlData)
+    variables.mlData['modelRF'], variables.mlData['probRF'], variables.mlData['apsRF'], variables.mlData['roc_aucRF'] = models.randomForestWMetrics(variables.mlData['xTrain'], variables.mlData['yTrain'], variables.mlData['xTest'], variables.mlData['yTest'])
 
     # Scaling
     variables.mlData['scaledXTrain'] = csr_matrix(variables.mlData['xTrain'].copy())
@@ -43,7 +39,7 @@ def mainModel():
     variables.mlData['scaledXTest'] = scaler.transform(variables.mlData['scaledXTest'])
 
     # Logistic Regression
-    variables.mlData = models.logisticRegressionWMetrics(variables.mlData)
+    variables.mlData['modelLR'], variables.mlData['probLR'], variables.mlData['apsLR'], variables.mlData['roc_aucLR'] = models.logisticRegressionWMetrics(variables.mlData['scaledXTrain'], variables.mlData['yTrain'], variables.mlData['scaledXTest'], variables.mlData['yTest'])
 
     # Testing the correlation between models
     pd.DataFrame({'RF': variables.mlData['probRF'], 'LBGM': variables.mlData['probLGBM'], 'LR': variables.mlData['probLR']}).corr()

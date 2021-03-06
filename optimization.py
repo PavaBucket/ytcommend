@@ -18,19 +18,25 @@ def LGBMTargetFunction(parameters):
 
     print(parameters)
 
-    # Get train and test masks
+    # Get train and test masks and segmentations
     maskTrainTest = settings.getMaskTrainTest(variables.mlData['cleanedData'])
+    xTrain, xTest = variables.mlData['features'][maskTrainTest['maskTrain']], variables.mlData['features'][maskTrainTest['maskTest']]
+    yTrain, yTest = variables.mlData['y'][maskTrainTest['maskTrain']], variables.mlData['y'][maskTrainTest['maskTest']]
 
-    # Extract text
-    variables.mlData = functions.dataFromText(variables.mlData['cleanedData'], maskTrainTest['maskTrain'], maskTrainTest['maskTest'], variables.mlData, {'min_df': min_df, 'ngram_range': ngram_range})
+    # Extract data from text
+    tFidVec, titleBOWTrain, titleBOWTest = functions.dataFromText(variables.mlData['cleanedData']['title'], maskTrainTest['maskTrain'], maskTrainTest['maskTest'], {'min_df': min_df, 'ngram_range': ngram_range})
+
+    # Include extracted text into training and testing
+    xTrain = functions.mergeDataFrames(xTrain, titleBOWTrain)
+    xTest = functions.mergeDataFrames(xTest, titleBOWTest)
 
     # Run model
-    variables.mlData = models.lgbmWMetrics(variables.mlData, 2 ** max_depth, learning_rate, max_depth, min_child_samples, subsample, colsample_bytree, n_estimators)
+    model, prob, aps, roc_auc = models.lgbmWMetrics(xTrain, yTrain, xTest, yTest, 2 ** max_depth, learning_rate, max_depth, min_child_samples, subsample, colsample_bytree, n_estimators)
 
-    print(variables.mlData['apsLGBM'])
-    print(variables.mlData['roc_aucLGBM'])
+    print(aps)
+    print(roc_auc)
 
-    return -variables.mlData['apsLGBM']
+    return -aps
 
 
 def optimizeLGBM(space):

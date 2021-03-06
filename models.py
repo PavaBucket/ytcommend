@@ -5,65 +5,62 @@ from sklearn.tree import DecisionTreeClassifier
 from lightgbm import LGBMClassifier
 
 
-def randomForestWMetrics(mlData):
+def randomForestWMetrics(xTrain, yTrain, xTest, yTest):
 
     # Modelling: Random Forest
-    modelRF = RandomForestClassifier(n_estimators=1000, random_state=0, min_samples_leaf=2, class_weight="balanced", n_jobs=6)
-    modelRF.fit(mlData['xTrain'], mlData['yTrain'])
-    mlData['modelRF'] = modelRF
+    model = RandomForestClassifier(n_estimators=1000, random_state=0, min_samples_leaf=2, class_weight="balanced", n_jobs=6)
+    model.fit(xTrain, yTrain)
 
-    mlData['probRF'] = modelRF.predict_proba(mlData['xTest'])[:, 1]
+    prob = model.predict_proba(xTest)[:, 1]
 
     # Metrics for testing the model
-    mlData['apsRF'] = average_precision_score(mlData['yTest'], mlData['probRF'])
-    mlData['roc_aucRF'] = roc_auc_score(mlData['yTest'], mlData['probRF'])
+    aps = average_precision_score(yTest, prob)
+    roc_auc = roc_auc_score(yTest, prob)
 
-    return mlData
+    return model, prob, aps, roc_auc
 
 
-def decisionTreeWMetrics(mlData):
+def decisionTreeWMetrics(xTrain, yTrain, xTest, yTest):
 
     # Modelling: Decision Tree
-    modelDT = DecisionTreeClassifier(random_state=0, max_depth=3, class_weight="balanced")
-    modelDT.fit(mlData['xTrain'], mlData['yTrain'])
-    mlData['modelDT'] = modelDT
+    model = DecisionTreeClassifier(random_state=0, max_depth=3, class_weight="balanced")
+    model.fit(xTrain, yTrain)
 
-    mlData['probDT'] = modelDT.predict_proba(mlData['xTest'])[:, 1]
-
-    # Metrics for testing the model
-    mlData['apsDT'] = average_precision_score(mlData['yTest'], mlData['probDT'])
-    mlData['roc_aucDT'] = roc_auc_score(mlData['yTest'], mlData['probDT'])
-
-    return mlData
-
-
-def lgbmWMetrics(mlData, num_leaves, learning_rate, max_depth, min_child_samples, subsample, colsample_bytree, n_estimators):
-
-    modelLGBM = LGBMClassifier(num_leaves=num_leaves, random_state=0, class_weight="balanced", n_jobs=6, learning_rate=learning_rate,
-                               max_depth=max_depth, min_child_samples=min_child_samples, subsample=subsample, colsample_bytree=colsample_bytree,
-                               n_estimators=n_estimators)
-    modelLGBM.fit(mlData['xTrain'], mlData['yTrain'])
-    mlData['modelLGBM'] = modelLGBM
-
-    mlData['probLGBM'] = modelLGBM.predict_proba(mlData['xTest'])[:, 1]
+    prob = model.predict_proba(xTest)[:, 1]
 
     # Metrics for testing the model
-    mlData['apsLGBM'] = average_precision_score(mlData['yTest'], mlData['probLGBM'])
-    mlData['roc_aucLGBM'] = roc_auc_score(mlData['yTest'], mlData['probLGBM'])
+    aps = average_precision_score(yTest, prob)
+    roc_auc = roc_auc_score(yTest, prob)
 
-    return mlData
+    return model, prob, aps, roc_auc
 
 
-def logisticRegressionWMetrics(mlData):
+def lgbmWMetrics(xTrain, yTrain, xTest, yTest, num_leaves, learning_rate, max_depth, min_child_samples, subsample, colsample_bytree, n_estimators):
 
-    modelLR = LogisticRegression(C=0.5, n_jobs=6, random_state=0)
-    modelLR.fit(mlData['scaledXTrain'], mlData['yTrain'])
-    mlData['modelLR'] = modelLR
+    model = LGBMClassifier(num_leaves=num_leaves, random_state=0, class_weight="balanced", n_jobs=6, learning_rate=learning_rate,
+                           max_depth=max_depth, min_child_samples=min_child_samples, subsample=subsample, colsample_bytree=colsample_bytree,
+                           n_estimators=n_estimators)
+    model.fit(xTrain, yTrain)
 
-    mlData['probLR'] = modelLR.predict_proba(mlData['scaledXTest'])[:, 1]
+    prob = model.predict_proba(xTest)[:, 1]
 
     # Metrics for testing the model
-    mlData['apsLR'] = average_precision_score(mlData['yTest'], mlData['probLR'])
-    mlData['roc_aucLR'] = roc_auc_score(mlData['yTest'], mlData['probLR'])
+    aps = average_precision_score(yTest, prob)
+    roc_auc = roc_auc_score(yTest, prob)
 
-    return mlData
+    return model, prob, aps, roc_auc
+
+
+def logisticRegressionWMetrics(scaledXTrain, yTrain, scaledXTest, yTest):
+
+    model = LogisticRegression(C=0.5, n_jobs=6, random_state=0)
+
+    model.fit(scaledXTrain, yTrain)
+
+    prob = model.predict_proba(scaledXTest)[:, 1]
+
+    # Metrics for testing the model
+    aps = average_precision_score(yTest, prob)
+    roc_auc = roc_auc_score(yTest, prob)
+
+    return model, prob, aps, roc_auc
